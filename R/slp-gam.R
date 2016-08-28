@@ -9,7 +9,8 @@
 ################################################################################
 
 slp <- function(x, W = NA, K = NA, deltat = 1, naive = FALSE, 
-                intercept = FALSE, customSVD = TRUE, forceC = FALSE) {
+                intercept = FALSE, customSVD = TRUE, forceC = FALSE,
+                returnS = FALSE) {
 
   # logical checks (note: W is assumed to be in the same units as deltat, i.e., days)
   stopifnot(is.numeric(x), (is.na(W) | is.numeric(W) & W > 0 & W < 1/(2*deltat)), deltat %in% c(1, 6),
@@ -59,7 +60,7 @@ slp <- function(x, W = NA, K = NA, deltat = 1, naive = FALSE,
   # Logical check: if N, K and W match one of the saved objects, simply
   # return that object; otherwise, run through the generation process
   Wn <- round(W * 365.2425)    # convert to df/year
-  if(checkSaved(N, Wn, K) & !forceC) {
+  if(checkSaved(N, Wn, K) & !forceC & !returnS) {
 
     data(list = as.character(paste0("basis_N_", N, "_W_", Wn, "_K_", K)), 
          envir = environment())
@@ -76,6 +77,9 @@ slp <- function(x, W = NA, K = NA, deltat = 1, naive = FALSE,
       v <- .dpss(n = N, nw = N * W, k = K)
       if(naive) {        # Case of non-mean-adjusted Slepians, SLP
         basis <- v
+        if(returnS) {
+            sMat <- v %*% t(v)
+        }
       } else {           # Case of mean-adjusted Slepians, SLP2 or SLP3
     
         # Equations follow from Thomson (2001), see help file for full citation
@@ -86,28 +90,36 @@ slp <- function(x, W = NA, K = NA, deltat = 1, naive = FALSE,
         #  Two options: intercept = TRUE / FALSE
         sRaw <- v %*% (diag(K) - U %*% t(U)) %*% t(v)
 
-        if(customSVD) {
-          basis <- .slpsvd(A = sRaw, N = N, K = K)$u      # optimized LAPACK SVD for our edge case
-        } else { 
-          basis <- svd(sRaw, nu = K, nv = 0)$u            # generic R -> C -> LAPACK SVD
-        }
+        if(!returnS) {
+            if(customSVD) {
+              basis <- .slpsvd(A = sRaw, N = N, K = K)$u      # optimized LAPACK SVD for our edge case
+            } else { 
+              basis <- svd(sRaw, nu = K, nv = 0)$u            # generic R -> C -> LAPACK SVD
+            }
 
-        basis <- basis[, -K]   # mean adjustment implies a mean-passing subspace of dim K-1,
-                               # conveniently arranged so that basis vector K is out-of-band
-        if(intercept) { basis <- cbind(R, basis) }
+            basis <- basis[, -K]   # mean adjustment implies a mean-passing subspace of dim K-1,
+                                   # conveniently arranged so that basis vector K is out-of-band
+            if(intercept) { basis <- cbind(R, basis) }
 
-        dimnames(basis) <- list(names(wx), 1L:ncol(basis))
-     
-        # need to convert back to original time array -- the NAs in the original
-        if(any(is.na(x))) {
-          basis[which(!(wx %in% x[!is.na(x)])), ] <- rep(NA, ncol(basis))
+            dimnames(basis) <- list(names(wx), 1L:ncol(basis))
+         
+            # need to convert back to original time array -- the NAs in the original
+            if(any(is.na(x))) {
+              basis[which(!(wx %in% x[!is.na(x)])), ] <- rep(NA, ncol(basis))
+            }
+      
+            a <- list(K = K, W = W, N = N, naive = naive)
+            attributes(basis) <- c(attributes(basis), a)
+            class(basis) <- c("slp", "basis", "matrix")
+        } else {
+            sMat <- sRaw
         }
-  
-        a <- list(K = K, W = W, N = N, naive = naive)
-        attributes(basis) <- c(attributes(basis), a)
-        class(basis) <- c("slp", "basis", "matrix")
       }
   }
-  basis
+  if(!returnS) {
+      basis
+  } else {
+      sMat
+  }
 }
 

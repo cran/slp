@@ -10,4 +10,5 @@ importFrom(mgcv, smooth.construct, Predict.matrix)
 S3method(smooth.construct, slp.smooth.spec)
 S3method(Predict.matrix, slp.smooth)
 
+importFrom("utils", "data", "str")
 

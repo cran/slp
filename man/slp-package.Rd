@@ -14,8 +14,8 @@
 \tabular{ll}{
 Package: \tab slp\cr
 Type: \tab Package\cr
-Version: \tab 1.0-3\cr
-Date: \tab 2014-07-18\cr
+Version: \tab 1.0-5\cr
+Date: \tab 2016-08-28\cr
 License: \tab GPL-2 \cr
 }
 }

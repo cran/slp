@@ -14,7 +14,7 @@
 }
 \usage{
 slp(x, W = NA, K = NA, deltat = 1, naive = FALSE, intercept = FALSE, 
-    customSVD = TRUE, forceC = FALSE)
+    customSVD = TRUE, forceC = FALSE, returnS = FALSE)
 }
 \arguments{
   \item{x}{the predictor variable.  Missing values are allowed. Assumed to be contiguous;
@@ -47,6 +47,8 @@ slp(x, W = NA, K = NA, deltat = 1, naive = FALSE, intercept = FALSE,
       used \code{N, W, K} parameters have been pre-computed and included with the package. If this 
       parameter is set to \code{TRUE}, the routine will compute the basis vectors regardless of whether
       they are available in pre-computed form. See \code{\link{checkSaved}{checkSaved}} for further details. }
+  \item{returnS}{a flag for returning the projection matrix \code{S} rather than the basis vectors that form the same.
+      Intended to be used outside of model-fitting environments. }
 }
 \details{
   \code{slp} is based around the routine \code{.dpss}, which generates a family of Discrete

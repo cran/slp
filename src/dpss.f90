@@ -54,9 +54,9 @@ subroutine dpss (n, k, nw, v, ev)
        implicit none
        character :: range, order, cmach
        integer :: nsplit, m, info
+       integer :: k, ldv, n, il
        integer, target :: blockIntMem(5*n+k)
        integer,  pointer :: iblock(:), isplit(:), iwork(:), ifail(:)
-       integer :: k, ldv, n, il
        double precision :: vl, vu, abstol
        double precision :: d(n), e(n-1), v(ldv,k),  ev(n), work(5*n)
      end subroutine tridiagMatrixEigen
@@ -204,9 +204,9 @@ subroutine tridiagMatrixEigen(n, k, d, e, v, ldv, ev, &
   
   character :: range, order, cmach
   integer :: nsplit, m, info
+  integer :: k, ldv, n, il
   integer, target :: blockIntMem(5*n+k)
   integer,  pointer :: iblock(:), isplit(:), iwork(:), ifail(:)
-  integer :: k, ldv, n, il
   double precision :: vl, vu, abstol
   double precision :: d(n), e(n-1), v(ldv,k),  ev(n), work(5*n)
 
